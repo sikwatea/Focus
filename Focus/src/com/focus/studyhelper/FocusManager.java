@@ -1,5 +1,5 @@
 package com.focus.studyhelper;
 
-public class TaskManager {
+public class FocusManager {
 
 }
