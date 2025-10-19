@@ -18,16 +18,10 @@ public class FocusManager {
             System.out.println("[1] Start a Focus Session");
             System.out.println("[2] Study Techniques");
             System.out.println("[3] Session History");
-<<<<<<< Upstream, based on origin/master
             System.out.println("[4] Return to Home");
             System.out.println("[5] asdfwafdsfdasdf");
-=======
             System.out.println(ANSI_RED + "[4] Return to Home" + ANSI_RESET);
-<<<<<<< Upstream, based on origin/master
->>>>>>> cb76a46 test
-=======
             System.out.println("[5] asdfwafdsfdasdf");
->>>>>>> b0781c3 test 2
             System.out.print("> ");
 
             int choice = Integer.parseInt(scanner.nextLine());
