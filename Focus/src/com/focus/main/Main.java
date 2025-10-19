@@ -35,6 +35,6 @@ public class Main {
             }
         }
 
-        System.out.println("NOOOOOOOO!");
+        System.out.println("App terminated!");
     }
 }
