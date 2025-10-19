@@ -18,6 +18,7 @@ public class FocusManager {
             System.out.println("[2] Study Techniques");
             System.out.println("[3] Session History");
             System.out.println("[4] Return to Home");
+            System.out.println("[5] asdfwafdsfdasdf");
             System.out.print("> ");
 
             int choice = Integer.parseInt(scanner.nextLine());
