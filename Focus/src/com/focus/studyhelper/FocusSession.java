@@ -114,6 +114,7 @@ public class FocusSession {
         currentPhase = null; 
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Label: ").append(label)

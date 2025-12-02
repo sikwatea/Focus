@@ -25,6 +25,7 @@ public class StudyMethod {
     public MethodType getType() { return type; }
     public List<String> getSteps() { return steps; }
 
+    @Override
     public String toString() {
         return name + " (" + type + ")";
     }

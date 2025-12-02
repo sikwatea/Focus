@@ -12,6 +12,7 @@ public class Distraction {
         this.timestamp = LocalDateTime.now();
     }
 
+    @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         return "[" + timestamp.format(formatter) + "] " + reason;
