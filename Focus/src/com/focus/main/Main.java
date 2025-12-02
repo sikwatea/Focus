@@ -28,7 +28,7 @@ public class Main {
 
             switch (choice) {
                 //case 1 -> new TaskManager().start();
-                //case 2 -> new FlashcardManager().start();
+                case 2 -> new FlashcardManager().start();
                 case 3 -> new FocusManager().start();
                 case 4 -> running = false;
                 default -> System.out.println("\nNot in selection, Please try again :)");
