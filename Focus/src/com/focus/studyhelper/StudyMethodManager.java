@@ -64,7 +64,7 @@ public class StudyMethodManager {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input.");
         }
-        return methods.get(0); // Default to first if error
+        return methods.get(0);
     }
 
     private void printMethodDetails(StudyMethod m) {
