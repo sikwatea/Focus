@@ -13,15 +13,15 @@ public class TaskManager {
 
         do {
             System.out.println("\n=== TO DO LIST MENU ===");
-            System.out.println("1. Add Task");
-            System.out.println("2. View Tasks");
-            System.out.println("3. Complete Task");
-            System.out.println("4. Edit Task");
-            System.out.println("5. Delete Task");
-            System.out.println("6. Change Due Date");
-            System.out.println("7. Clear Completed");
-            System.out.println("8. Exit");
-            System.out.print("Enter choice: ");
+            System.out.println("[1] Add Task");
+            System.out.println("[2] View Tasks");
+            System.out.println("[3] Complete Task");
+            System.out.println("[4] Edit Task");
+            System.out.println("[5] Delete Task");
+            System.out.println("[6] Change Due Date");
+            System.out.println("[7] Clear Completed");
+            System.out.println("[8] Exit");
+            System.out.print("> ");
 
             try {
                 choice = Integer.parseInt(sc.nextLine());
