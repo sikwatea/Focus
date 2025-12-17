@@ -53,12 +53,11 @@ public class FocusManager {
         
         // sesh method
         StudyMethod method = methodManager.chooseMethod();
-        
-        if (method.getType() == StudyMethod.MethodType.ACTIVE_RECALL) {
-            System.out.println(ANSI_CYAN + "\n[INFO] For Active Recall, please use the Flashcards section of the app." + ANSI_RESET);
+
+        if (!method.isConsoleRunnable()) {
+            System.out.println("\n[INFO] This method is not supported in the console session (Try Flashcards).");
             return;
         }
-
         // sesh config
         System.out.print("Total Duration (minutes): ");
         int duration = Integer.parseInt(scanner.nextLine());

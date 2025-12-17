@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FocusSession {
-    // session statuses
     public enum SessionStatus { RUNNING, PAUSED, COMPLETED }
     public enum SessionPhase { STUDY, BREAKDOWN, BREAK }
 
@@ -14,7 +13,6 @@ public class FocusSession {
     private int breakCount;
     private int breakDurationMinutes;
     
-    // status tracking
     private SessionStatus status;
     private SessionPhase currentPhase;
     private long remainingTimeSeconds;
@@ -32,29 +30,24 @@ public class FocusSession {
         this.status = SessionStatus.RUNNING;
         this.currentPhase = SessionPhase.STUDY;
         
-        initializeTimeline();
+        method.initializeTimeline(this);
     }
 
-    // time splitting logic
-    private void initializeTimeline() {
-        int totalSeconds = totalDurationMinutes * 60;
-        
-        if (method.getType() == StudyMethod.MethodType.FEYNMAN) {
-            this.remainingTimeSeconds = totalSeconds;
-        } else {
-            int totalBreakSeconds = (breakCount * breakDurationMinutes) * 60;
-            int totalStudySeconds = totalSeconds - totalBreakSeconds;
-            int numberOfStudyChunks = breakCount + 1; 
-            
-            this.studyIntervalSeconds = totalStudySeconds / numberOfStudyChunks;
-            this.remainingTimeSeconds = studyIntervalSeconds; 
+    public boolean tick() {
+        if (status != SessionStatus.RUNNING) return true;
+
+        remainingTimeSeconds--;
+
+        if (remainingTimeSeconds <= 0) {
+            method.handlePhaseChange(this);
         }
+        
+        return status != SessionStatus.COMPLETED;
     }
 
     public void logDistraction(String reason) {
-        Distraction d = new Distraction(reason);
-        distractions.add(d);
-        System.out.println("Distraction logged: " + reason);
+        distractions.add(new Distraction(reason));
+        System.out.println("Distraction logged.");
     }
 
     public void pause() {
@@ -62,7 +55,7 @@ public class FocusSession {
             status = SessionStatus.PAUSED;
             System.out.println("Session PAUSED.");
         } else {
-            System.out.println("Cannot pause right now (Maybe it's a break?).");
+            System.out.println("Cannot pause right now.");
         }
     }
 
@@ -72,65 +65,33 @@ public class FocusSession {
             System.out.println("Session RESUMED.");
         }
     }
-
-    
-    public boolean tick() {
-        if (status != SessionStatus.RUNNING) return true;
-
-        remainingTimeSeconds--;
-
-        if (remainingTimeSeconds <= 0) {
-            handlePhaseChange();
-        }
-        
-        return currentPhase != null;
-    }
-
-    // feynman phases logic
-    private void handlePhaseChange() {
-        if (currentPhase == SessionPhase.STUDY || currentPhase == SessionPhase.BREAKDOWN) {
-            if (currentIntervalIndex < breakCount) {
-                System.out.println("\n*** TIME FOR A BREAK! (" + breakDurationMinutes + " mins) ***");
-                currentPhase = SessionPhase.BREAK;
-                remainingTimeSeconds = breakDurationMinutes * 60;
-                currentIntervalIndex++;
-            } else {
-                completeSession();
-            }
-        } else if (currentPhase == SessionPhase.BREAK) {
-            System.out.println("\n*** BREAK OVER! Back to Focus. ***");
-            if (method.getType() == StudyMethod.MethodType.FEYNMAN) {
-                currentPhase = SessionPhase.BREAKDOWN; 
-                System.out.println("Phase: Breakdown/Explanation");
-            } else {
-                currentPhase = SessionPhase.STUDY;
-            }
-            remainingTimeSeconds = studyIntervalSeconds;
-        }
-    }
     
     public void completeSession() {
         status = SessionStatus.COMPLETED;
         currentPhase = null; 
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Label: ").append(label)
-          .append(" | Method: ").append(method.getName())
-          .append(" | Total: ").append(totalDurationMinutes).append("m\n")
-          .append("   Distractions: ").append(distractions.size());
-        
-        for(Distraction d : distractions) {
-            sb.append("\n    - ").append(d);
-        }
-        return sb.toString();
-    }
-    
     public String getStatusDisplay() {
         long mins = remainingTimeSeconds / 60;
         long secs = remainingTimeSeconds % 60;
-        return String.format("[%s] %s - %02d:%02d", status, currentPhase, mins, secs);
+        return String.format("[%s] %s - %02d:%02d", status, currentPhase != null ? currentPhase : "DONE", mins, secs);
     }
+
+    @Override
+    public String toString() {
+        return "Label: " + label + " | Method: " + method.getName();
+    }
+
+    // all getters and setters
+    public int getTotalDurationMinutes() { return totalDurationMinutes; }
+    public int getBreakCount() { return breakCount; }
+    public int getBreakDurationMinutes() { return breakDurationMinutes; }
+    public SessionPhase getCurrentPhase() { return currentPhase; }
+    public void setCurrentPhase(SessionPhase phase) { this.currentPhase = phase; }
+    public int getStudyIntervalSeconds() { return studyIntervalSeconds; }
+    public void setStudyIntervalSeconds(int seconds) { this.studyIntervalSeconds = seconds; }
+    public long getRemainingTimeSeconds() { return remainingTimeSeconds; }
+    public void setRemainingTimeSeconds(long seconds) { this.remainingTimeSeconds = seconds; }
+    public int getCurrentIntervalIndex() { return currentIntervalIndex; }
+    public void incrementIntervalIndex() { this.currentIntervalIndex++; }
 }
