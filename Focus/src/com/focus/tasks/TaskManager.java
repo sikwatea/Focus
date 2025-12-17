@@ -4,12 +4,11 @@ import java.util.Scanner;
 import java.time.LocalDate;
 
 public class TaskManager {
-
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
+    public void start() {
+    	Scanner sc = new Scanner(System.in);
         TaskList list = new TaskList();
         int choice = 0;
-
+        
         while (choice != 5) {
             System.out.println("\n=== TO DO LIST ===");
             System.out.println("1. Add Task");
@@ -61,7 +60,6 @@ public class TaskManager {
                 System.out.println("Invalid input. Try again.");
             }
         }
-
         sc.close();
     }
 }
