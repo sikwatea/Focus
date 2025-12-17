@@ -27,7 +27,7 @@ public class Main {
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                //case 1 -> new TaskManager().start();
+                case 1 -> new TaskManager().start();
                 case 2 -> new FlashcardManager().start();
                 case 3 -> new FocusManager().start();
                 case 4 -> running = false;
