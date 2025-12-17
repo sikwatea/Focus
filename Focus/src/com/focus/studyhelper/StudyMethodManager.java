@@ -25,6 +25,7 @@ public class StudyMethodManager {
         );
         methods.add(new StudyMethod("Pomodoro", "Standard interval training", StudyMethod.MethodType.POMODORO, pomodoroSteps));
 
+        // TEST TEST TEST
         // Feynman
         List<String> feynmanSteps = Arrays.asList(
             "1. Choose a concept to study.",
