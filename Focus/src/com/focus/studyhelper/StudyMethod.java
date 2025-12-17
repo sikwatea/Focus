@@ -1,32 +1,31 @@
 package com.focus.studyhelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class StudyMethod {
-    public enum MethodType {
-        POMODORO, FEYNMAN, ACTIVE_RECALL
-    }
+public abstract class StudyMethod {
+	protected String name;
+    protected String description;
+    protected List<String> steps;
 
-    private String name;
-    private String description;
-    private List<String> steps;
-    private MethodType type;
-
-    public StudyMethod(String name, String description, MethodType type, List<String> steps) {
+    public StudyMethod(String name, String description, List<String> steps) {
         this.name = name;
         this.description = description;
-        this.type = type;
         this.steps = steps;
     }
 
-    public String getName() { return name; }
+	public String getName() { return name; }
     public String getDescription() { return description; }
-    public MethodType getType() { return type; }
     public List<String> getSteps() { return steps; }
+
+    public abstract void initializeTimeline(FocusSession session);
+    public abstract void handlePhaseChange(FocusSession session);
+    
+    public boolean isConsoleRunnable() {
+        return true; 
+    }
 
     @Override
     public String toString() {
-        return name + " (" + type + ")";
+        return name;
     }
 }

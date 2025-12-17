@@ -21,7 +21,7 @@ public class Main {
             System.out.println("[1] Task Manager");
             System.out.println("[2] Flashcards");
             System.out.println("[3] Focus Study Helper");
-            System.out.println(ANSI_RED + "[4] Exit" + ANSI_RESET);
+            System.out.println(ANSI_RED + "[0] Exit" + ANSI_RESET);
             System.out.print("> ");
 
             int choice = Integer.parseInt(scanner.nextLine());
@@ -30,7 +30,7 @@ public class Main {
                 case 1 -> new TaskManager().start();
                 case 2 -> new FlashcardManager().start();
                 case 3 -> new FocusManager().start();
-                case 4 -> running = false;
+                case 0 -> running = false;
                 default -> System.out.println("\nNot in selection, Please try again :)");
             }
         }
