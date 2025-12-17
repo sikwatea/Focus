@@ -1,51 +1,48 @@
 package com.focus.tasks;
 
 import java.time.LocalDate;
+import java.io.Serializable;
 
-public class Task {
-    private String title;
-    private boolean completed;
-    private LocalDate dueDate;
+public class Task implements Serializable {
+    protected String title;
+    protected boolean completed;
+    protected LocalDate dueDate;
 
-    public Task(String title, LocalDate dueDate, boolean completed) {
+    public Task(String title, LocalDate dueDate) {
         this.title = title;
         this.dueDate = dueDate;
-        this.completed = completed;
+        this.completed = false;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public LocalDate getDueDate() {
-        return dueDate;
+    public void markCompleted() {
+        completed = true;
     }
 
     public boolean isCompleted() {
         return completed;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public String getType() {
+        return "General";
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public void markCompleted() {
-        this.completed = true;
-    }
-
-   
-    public String toDataString() {
-        return title + "|" + dueDate + "|" + completed;
-    }
-
-    @Override
     public String toString() {
-        return String.format("%-20s | %-12s | %s",
-                title, dueDate, (completed ? "✔" : "✖"));
+        return String.format("%-20s | %-12s | %-8s | %s",
+                title,
+                dueDate,
+                getType(),
+                completed ? "✔" : "✖");
+    }
+}
+
+class StudyTask extends Task {
+
+    public StudyTask(String title, LocalDate dueDate) {
+        super(title, dueDate);
+    }
+
+    public String getType() {
+        return "Study";
     }
 }
 
