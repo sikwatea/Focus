@@ -1,40 +1,117 @@
 package com.focus.main;
 
-import java.util.Scanner;
-import com.focus.tasks.TaskManager;
-import com.focus.flashcards.FlashcardManager;
-import com.focus.studyhelper.FocusManager;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
+import javafx.scene.effect.DropShadow;
 
-public class Main {
-    private static Scanner scanner = new Scanner(System.in);
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String BOLD = "\033[0;1m";
-    public static final String RESET = "\033[0m";
-    
-    public static void main(String[] args) {
-        boolean running = true;
+/*
+ * changed all 2c3e50 to 49654E 2nd
+ * changed 7f8c8d to 8BA889 3rd
+ */
+
+public class Main extends Application {
+    private BorderPane mainLayout;
+
+    @Override
+    public void start(Stage primaryStage) {
+    	
+        mainLayout = new BorderPane();
+        mainLayout.setLeft(createSideMenu());
+        mainLayout.setCenter(createHomeView());
+        Scene scene = new Scene(mainLayout, 900, 600);
         
-        while (running) {
-            System.out.println(BOLD + ANSI_GREEN + "\n=== Focus App ===" + ANSI_RESET + RESET);
-            System.out.println("[1] Task Manager");
-            System.out.println("[2] Flashcards");
-            System.out.println("[3] Focus Study Helper");
-            System.out.println(ANSI_RED + "[0] Exit" + ANSI_RESET);
-            System.out.print("> ");
+        Image icon = new Image("focus.png");
+		primaryStage.getIcons().add(icon);
+        
+        primaryStage.setTitle("Focus App - Form habits, Find your flow");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
 
-            int choice = Integer.parseInt(scanner.nextLine());
+    public static void main(String[] args) {
+        launch(args);
+    }
+    
+    private VBox createSideMenu() {
+        VBox sidebar = new VBox(15); 
+        sidebar.setPadding(new Insets(20));
+        sidebar.setStyle("-fx-background-color: #49654E;");
+        sidebar.setPrefWidth(200); 
 
-            switch (choice) {
-                case 1 -> new TaskManager().start();
-                case 2 -> new FlashcardManager().start();
-                case 3 -> new FocusManager().start();
-                case 0 -> running = false;
-                default -> System.out.println("\nNot in selection, Please try again :)");
-            }
-        }
+        Label appTitle = new Label("F.OCUS");
+        appTitle.setStyle("-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
 
-        System.out.println("App terminated!");
+        Button btnHome = createNavButton("Home");
+        Button btnTasks = createNavButton("Task Manager");
+        Button btnFlashcards = createNavButton("Flashcards");
+        Button btnFocus = createNavButton("Focus Mode");
+
+        btnHome.setOnAction(e -> mainLayout.setCenter(createHomeView()));
+
+        // placeholder events
+        btnTasks.setOnAction(e -> System.out.println("Navigate to Tasks")); 
+        btnFlashcards.setOnAction(e -> System.out.println("Navigate to Flashcards"));
+        btnFocus.setOnAction(e -> mainLayout.setCenter(new FocusView()));
+
+        sidebar.getChildren().addAll(appTitle, btnHome, btnTasks, btnFlashcards, btnFocus);
+
+        return sidebar;
+    }
+
+    private Button createNavButton(String text) {
+        Button btn = new Button(text);
+        DropShadow shadow = new DropShadow();
+//        shadow.setColor(Color.web("#e8f5e9"));
+//        shadow.setOffsetX(2.0);
+//        shadow.setOffsetY(2.0);
+        btn.setPrefWidth(160);
+        btn.setPrefHeight(40);
+        btn.setStyle("-fx-background-color: white; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
+
+        btn.setOnMouseEntered(e -> {
+            btn.setStyle("-fx-background-color: #e8f5e9; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
+            ScaleTransition st = new ScaleTransition(Duration.millis(200), btn);
+//            btn.setEffect(shadow);
+            st.setToX(1.1);
+            st.setToY(1.1); 
+            st.play();
+        });
+
+        btn.setOnMouseExited(e -> {
+            btn.setStyle("-fx-background-color: white; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
+            ScaleTransition st = new ScaleTransition(Duration.millis(200), btn);
+//            btn.setEffect(null);
+            st.setToX(1.0);
+            st.setToY(1.0);
+            st.play();
+        });
+
+        return btn;
+    }
+    
+    private Pane createHomeView() {
+        VBox homeView = new VBox(20); 
+        homeView.setAlignment(Pos.CENTER); 
+        homeView.setStyle("-fx-background-color: white;"); 
+
+        Label welcomeLabel = new Label("Welcome to F.ocus");
+        welcomeLabel.setStyle("-fx-font-size: 32px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
+
+        Label subLabel = new Label("Select a Tool from the sideabr to start");
+        subLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #8BA889; -fx-font-family: 'Montserrat';");
+
+        homeView.getChildren().addAll(welcomeLabel, subLabel);
+        return homeView;
     }
 }
