@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.io.Serializable;
 
 public class Task implements Serializable {
+    private static final long serialVersionUID = 1L; // ayaw ra i mind as mao rana gamiton pang track sa versions
+    
     protected String title;
     protected boolean completed;
     protected LocalDate dueDate;
@@ -14,37 +16,21 @@ public class Task implements Serializable {
         this.completed = false;
     }
 
-    public void markCompleted() {
-        completed = true;
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
+    // getters and setters for javafx
+    public String getTitle() { return title; }
+    public LocalDate getDueDate() { return dueDate; }
+    public boolean isCompleted() { return completed; }
 
     public String getType() {
         return "General";
     }
 
+    @Override
     public String toString() {
-        return String.format("%-20s | %-12s | %-8s | %s",
-                title,
-                dueDate,
-                getType(),
-                completed ? "✔" : "✖");
+        return title;
     }
 }
-
-class StudyTask extends Task {
-
-    public StudyTask(String title, LocalDate dueDate) {
-        super(title, dueDate);
-    }
-
-    public String getType() {
-        return "Study";
-    }
-}
-
-
-
