@@ -9,15 +9,13 @@ public class ActiveRecallMethod extends StudyMethod {
     }
 
     @Override
-    public boolean isConsoleRunnable() {
-        return false; 
-    }
-
-    @Override
     public void initializeTimeline(FocusSession session) {
+        int totalSeconds = session.getTotalDurationMinutes() * 60;
+        session.setRemainingTimeSeconds(totalSeconds);
     }
 
     @Override
     public void handlePhaseChange(FocusSession session) {
+        session.completeSession();
     }
 }
