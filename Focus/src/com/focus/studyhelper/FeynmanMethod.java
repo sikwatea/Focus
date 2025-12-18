@@ -11,28 +11,35 @@ public class FeynmanMethod extends StudyMethod {
     @Override
     public void initializeTimeline(FocusSession session) {
         int totalSeconds = session.getTotalDurationMinutes() * 60;
+        
+        session.setStudyIntervalSeconds(totalSeconds);      
         session.setRemainingTimeSeconds(totalSeconds);
     }
 
     @Override
     public void handlePhaseChange(FocusSession session) {
-        if (session.getCurrentPhase() == FocusSession.SessionPhase.STUDY || 
-            session.getCurrentPhase() == FocusSession.SessionPhase.BREAKDOWN) {
-            
-            if (session.getCurrentIntervalIndex() < session.getBreakCount()) {
-                System.out.println("\n*** TIME FOR A BREAK! (" + session.getBreakDurationMinutes() + " mins) ***");
+        if (session.getCurrentPhase() == FocusSession.SessionPhase.STUDY) {
+            if (session.getBreakCount() > 0 && session.getCurrentIntervalIndex() < session.getBreakCount()) {
                 session.setCurrentPhase(FocusSession.SessionPhase.BREAK);
                 session.setRemainingTimeSeconds(session.getBreakDurationMinutes() * 60);
                 session.incrementIntervalIndex();
             } else {
-                session.completeSession();
+            	startBreakdown(session);
             }
-        } else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
-            System.out.println("\n*** BREAK OVER! Prepare to Explain. ***");
-            // breakdown phase
-            session.setCurrentPhase(FocusSession.SessionPhase.BREAKDOWN);
-            System.out.println("Phase: Breakdown/Explanation (Simplifying concept...)");
-            session.setRemainingTimeSeconds(session.getStudyIntervalSeconds() > 0 ? session.getStudyIntervalSeconds() : 300);
+        } 
+        else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
+            startBreakdown(session);
         }
+        else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAKDOWN) {
+            session.completeSession();
+        }
+    }
+
+    private void startBreakdown(FocusSession session) {
+        System.out.println("\n*** BREAK OVER! Prepare to Explain. ***");
+        session.setCurrentPhase(FocusSession.SessionPhase.BREAKDOWN);
+        
+        int breakdownSeconds = session.getBreakdownDurationMinutes() * 60;
+        session.setRemainingTimeSeconds(breakdownSeconds);
     }
 }

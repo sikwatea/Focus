@@ -12,6 +12,7 @@ public class FocusSession {
     private int totalDurationMinutes;
     private int breakCount;
     private int breakDurationMinutes;
+    private int breakdownDurationMinutes;
     
     private SessionStatus status;
     private SessionPhase currentPhase;
@@ -21,12 +22,13 @@ public class FocusSession {
     private int studyIntervalSeconds;
     private int currentIntervalIndex = 0;
 
-    public FocusSession(String label, StudyMethod method, int totalDurationMinutes, int breakCount, int breakDurationMinutes) {
+    public FocusSession(String label, StudyMethod method, int totalDurationMinutes, int breakCount, int breakDurationMinutes, int breakdownDurationMinutes) {
         this.label = label;
         this.method = method;
         this.totalDurationMinutes = totalDurationMinutes;
         this.breakCount = breakCount;
         this.breakDurationMinutes = breakDurationMinutes;
+        this.breakdownDurationMinutes = breakdownDurationMinutes;
         this.status = SessionStatus.RUNNING;
         this.currentPhase = SessionPhase.STUDY;
         
@@ -86,6 +88,7 @@ public class FocusSession {
     public int getTotalDurationMinutes() { return totalDurationMinutes; }
     public int getBreakCount() { return breakCount; }
     public int getBreakDurationMinutes() { return breakDurationMinutes; }
+    public int getBreakdownDurationMinutes() { return breakdownDurationMinutes; }
     public SessionPhase getCurrentPhase() { return currentPhase; }
     public void setCurrentPhase(SessionPhase phase) { this.currentPhase = phase; }
     public int getStudyIntervalSeconds() { return studyIntervalSeconds; }
