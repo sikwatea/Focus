@@ -3,6 +3,7 @@ package com.focus.studyhelper;
 import java.util.List;
 
 public class FeynmanMethod extends StudyMethod {
+	private static final long serialVersionUID = 1L;
 
     public FeynmanMethod(String name, String description, List<String> steps) {
         super(name, description, steps);
@@ -10,36 +11,48 @@ public class FeynmanMethod extends StudyMethod {
 
     @Override
     public void initializeTimeline(FocusSession session) {
-        int totalSeconds = session.getTotalDurationMinutes() * 60;
+        long totalSeconds = session.getTotalDurationMinutes() * 60;
+        long totalBreakSeconds = session.getBreakCount() * session.getBreakDurationMinutes() * 60;
+        long availableWorkSeconds = totalSeconds - totalBreakSeconds;
         
-        session.setStudyIntervalSeconds(totalSeconds);      
-        session.setRemainingTimeSeconds(totalSeconds);
+        int chunks = session.getBreakCount() + 1;
+        long blockSeconds = availableWorkSeconds / chunks;
+        
+        // Splits chunks for study and breakdown
+        long breakdownSeconds = session.getBreakdownDurationMinutes() * 60;
+        long studySeconds = blockSeconds - breakdownSeconds;
+        
+        if (studySeconds <= 0) studySeconds = 300;
+        
+        session.setStudyIntervalSeconds((int) studySeconds);
+        session.setRemainingTimeSeconds(studySeconds);
+        session.setCurrentPhase(FocusSession.SessionPhase.STUDY);
     }
 
     @Override
     public void handlePhaseChange(FocusSession session) {
         if (session.getCurrentPhase() == FocusSession.SessionPhase.STUDY) {
-            if (session.getBreakCount() > 0 && session.getCurrentIntervalIndex() < session.getBreakCount()) {
+            // switch phase study to breakdown
+            System.out.println("Switching to BREAKDOWN");
+            session.setCurrentPhase(FocusSession.SessionPhase.BREAKDOWN);
+            session.setRemainingTimeSeconds(session.getBreakdownDurationMinutes() * 60L);
+            
+        } else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAKDOWN) {
+            // switch phase breakdown to break or finish
+            if (session.getCurrentIntervalIndex() < session.getBreakCount()) {
+                System.out.println("Switching to BREAK");
                 session.setCurrentPhase(FocusSession.SessionPhase.BREAK);
-                session.setRemainingTimeSeconds(session.getBreakDurationMinutes() * 60);
+                session.setRemainingTimeSeconds(session.getBreakDurationMinutes() * 60L);
                 session.incrementIntervalIndex();
             } else {
-            	startBreakdown(session);
+                session.completeSession();
             }
-        } 
-        else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
-            startBreakdown(session);
+            
+        } else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
+            // switch phase break to study
+            System.out.println("Switching to STUDY");
+            session.setCurrentPhase(FocusSession.SessionPhase.STUDY);
+            session.setRemainingTimeSeconds(session.getStudyIntervalSeconds());
         }
-        else if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAKDOWN) {
-            session.completeSession();
-        }
-    }
-
-    private void startBreakdown(FocusSession session) {
-        System.out.println("\n*** BREAK OVER! Prepare to Explain. ***");
-        session.setCurrentPhase(FocusSession.SessionPhase.BREAKDOWN);
-        
-        int breakdownSeconds = session.getBreakdownDurationMinutes() * 60;
-        session.setRemainingTimeSeconds(breakdownSeconds);
     }
 }
