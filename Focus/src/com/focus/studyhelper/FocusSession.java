@@ -1,10 +1,13 @@
 package com.focus.studyhelper;
 
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FocusSession {
-	public enum SessionStatus { RUNNING, PAUSED, COMPLETED }
+public class FocusSession implements Serializable {
+	public enum SessionStatus { RUNNING, PAUSED, COMPLETED, UNFINISHED}
 	public enum SessionPhase { STUDY, BREAKDOWN, BREAK }
     
     private String label;
@@ -19,6 +22,8 @@ public class FocusSession {
     private long remainingTimeSeconds;
     private List<Distraction> distractions = new ArrayList<>();
     
+    private LocalDateTime startTime;
+    
     private int studyIntervalSeconds;
     private int currentIntervalIndex = 0;
 
@@ -31,6 +36,8 @@ public class FocusSession {
         this.breakdownDurationMinutes = breakdownDurationMinutes;
         this.status = SessionStatus.RUNNING;
         this.currentPhase = SessionPhase.STUDY;
+        
+        this.startTime = LocalDateTime.now();
         
         method.initializeTimeline(this);
     }
@@ -73,6 +80,17 @@ public class FocusSession {
         currentPhase = null; 
     }
 
+    public void abandonSession() {
+        status = SessionStatus.UNFINISHED;
+        currentPhase = null;
+    }
+    
+    public String getStartDate() {
+        if (startTime == null) return "N/A";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, HH:mm");
+        return startTime.format(formatter);
+    }
+    
     public String getStatusDisplay() {
         long mins = remainingTimeSeconds / 60;
         long secs = remainingTimeSeconds % 60;
@@ -98,4 +116,7 @@ public class FocusSession {
     public int getCurrentIntervalIndex() { return currentIntervalIndex; }
     public void incrementIntervalIndex() { this.currentIntervalIndex++; }
     public SessionStatus getStatus() { return status; }
+    public String getLabel() { return label; }
+    public String getMethodName() { return method.getName(); }
+    public int getDistractionCount() { return distractions.size(); }
 }

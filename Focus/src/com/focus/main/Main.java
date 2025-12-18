@@ -13,16 +13,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Pane;
 import javafx.animation.ScaleTransition;
 import javafx.util.Duration;
-import javafx.scene.effect.DropShadow;
-
-/*
- * changed all 2c3e50 to 49654E 2nd
- * changed 7f8c8d to 8BA889 3rd
- */
 
 public class Main extends Application {
     private BorderPane mainLayout;
-
+    private FocusView focusView;
+    // private FlashcardView flashcardView;
+    // private TaskView taskView;
     @Override
     public void start(Stage primaryStage) {
     	
@@ -62,7 +58,12 @@ public class Main extends Application {
         // placeholder events
         btnTasks.setOnAction(e -> System.out.println("Navigate to Tasks")); 
         btnFlashcards.setOnAction(e -> System.out.println("Navigate to Flashcards"));
-        btnFocus.setOnAction(e -> mainLayout.setCenter(new FocusView()));
+        btnFocus.setOnAction(e -> {
+            if (focusView == null) {
+                focusView = new FocusView();
+            }
+            mainLayout.setCenter(focusView);
+        });
 
         sidebar.getChildren().addAll(appTitle, btnHome, btnTasks, btnFlashcards, btnFocus);
 
@@ -71,10 +72,6 @@ public class Main extends Application {
 
     private Button createNavButton(String text) {
         Button btn = new Button(text);
-        DropShadow shadow = new DropShadow();
-//        shadow.setColor(Color.web("#e8f5e9"));
-//        shadow.setOffsetX(2.0);
-//        shadow.setOffsetY(2.0);
         btn.setPrefWidth(160);
         btn.setPrefHeight(40);
         btn.setStyle("-fx-background-color: white; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
@@ -82,7 +79,6 @@ public class Main extends Application {
         btn.setOnMouseEntered(e -> {
             btn.setStyle("-fx-background-color: #e8f5e9; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
             ScaleTransition st = new ScaleTransition(Duration.millis(200), btn);
-//            btn.setEffect(shadow);
             st.setToX(1.1);
             st.setToY(1.1); 
             st.play();
@@ -91,7 +87,6 @@ public class Main extends Application {
         btn.setOnMouseExited(e -> {
             btn.setStyle("-fx-background-color: white; -fx-background-radius: 7px; -fx-text-fill: #49654E; -fx-font-size: 14px;");
             ScaleTransition st = new ScaleTransition(Duration.millis(200), btn);
-//            btn.setEffect(null);
             st.setToX(1.0);
             st.setToY(1.0);
             st.play();
