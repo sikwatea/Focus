@@ -24,8 +24,8 @@ public class FocusView extends VBox {
     private Spinner<Integer> durationSpinner;
     private Spinner<Integer> breaksSpinner;
     private Spinner<Integer> breakDurationSpinner;
-    private Spinner<Integer> breakdownSpinner; // <--- NEW SPINNER
-    private VBox breakdownBox; // Container to hide/show it
+    private Spinner<Integer> breakdownSpinner;
+    private VBox breakdownBox; 
     private Timeline timeline;
     
     public FocusView() {
@@ -87,6 +87,7 @@ public class FocusView extends VBox {
         
         breakdownBox = createInputBox("Breakdown Length (mins):");
         breakdownSpinner = new Spinner<>(1, 60, 5); // Min 1, Max 60, Default 5 | FOR DEBUG (actual time should be 1, 60, 5)
+        breakdownSpinner.setEditable(true);
         breakdownBox.getChildren().add(breakdownSpinner);
         
         breakdownBox.setVisible(false);
