@@ -1,8 +1,9 @@
 package com.focus.studyhelper;
 
+import java.io.*;
 import java.util.List;
 
-public abstract class StudyMethod {
+public abstract class StudyMethod implements Serializable {
 	protected String name;
     protected String description;
     protected List<String> steps;

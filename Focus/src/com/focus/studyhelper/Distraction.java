@@ -1,9 +1,10 @@
 package com.focus.studyhelper;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Distraction {
+public class Distraction implements Serializable {
     private String reason;
     private LocalDateTime timestamp;
 
