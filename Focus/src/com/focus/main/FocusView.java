@@ -13,7 +13,13 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Circle;
+import javafx.scene.layout.Pane;
 
 //timer import
 import javafx.animation.KeyFrame;
@@ -35,6 +41,11 @@ public class FocusView extends VBox {
     private VBox breakdownBox; 
     
     private Timeline timeline;
+    
+    // visual timer
+    private Arc progressArc; 
+    private long currentMaxDuration; 
+    private String lastPhaseName = "";
     
     public FocusView() {
         loadHistory();
@@ -286,14 +297,47 @@ public class FocusView extends VBox {
     private void switchToTimerView(FocusSession session) {
         this.getChildren().clear(); 
         
+        this.currentMaxDuration = session.getRemainingTimeSeconds();
+        this.lastPhaseName = session.getCurrentPhase().toString();
+        
+        StackPane timerStack = new StackPane();
+        timerStack.setPrefSize(300, 300);
+        
+        Circle trackCircle = new Circle(140);
+        trackCircle.setFill(Color.TRANSPARENT);
+        trackCircle.setStroke(Color.web("#ecf0f1"));
+        trackCircle.setStrokeWidth(15);
+        
+        // progress circle
+        progressArc = new Arc();
+        progressArc.setRadiusX(140);
+        progressArc.setRadiusY(140);
+        progressArc.setStartAngle(90); 
+        progressArc.setLength(360);    
+        progressArc.setType(ArcType.OPEN);
+        progressArc.setFill(null);
+        progressArc.setStroke(Color.web("#49654E"));
+        progressArc.setStrokeWidth(15);
+        progressArc.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+        progressArc.setCenterX(150); 
+        progressArc.setCenterY(150);
+        
+        Pane arcPane = new Pane();
+        arcPane.setPrefSize(300, 300);
+        arcPane.setMaxSize(300, 300);
+        
+        arcPane.getChildren().add(progressArc);
+        
         // Phase label
         Label phaseLabel = new Label(session.getCurrentPhase().toString());
         phaseLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: #8BA889; -fx-font-weight: bold;");
 
         // Timer label
         Label timerLabel = new Label(formatTime(session.getRemainingTimeSeconds()));
-        timerLabel.setStyle("-fx-font-size: 96px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
+        timerLabel.setStyle("-fx-font-size: 78px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
 
+        timerStack.getChildren().addAll(trackCircle, arcPane, timerLabel);
+        
         // Goal label
         Label goalLabel = new Label("Goal: " + labelField.getText()); 
         goalLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #555;");
@@ -312,10 +356,30 @@ public class FocusView extends VBox {
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             boolean isRunning = session.tick();
 
+            String currentPhaseName = session.getCurrentPhase() != null ? session.getCurrentPhase().toString() : "DONE";
+            if (!currentPhaseName.equals(lastPhaseName)) {
+                // phase change
+                currentMaxDuration = session.getRemainingTimeSeconds();
+                lastPhaseName = currentPhaseName;
+                
+                // change break circle colors
+                if (currentPhaseName.equals("BREAK")) {
+                    progressArc.setStroke(Color.web("#8BA889")); 
+                } else {
+                    progressArc.setStroke(Color.web("#49654E"));
+                }
+            }
+            
             // update labels
             timerLabel.setText(formatTime(session.getRemainingTimeSeconds()));
-            phaseLabel.setText(session.getCurrentPhase() != null ? session.getCurrentPhase().toString() : "COMPLETED");
+            phaseLabel.setText(currentPhaseName);
 
+            if (currentMaxDuration > 0) {
+                double progress = (double) session.getRemainingTimeSeconds() / currentMaxDuration;
+                progress = Math.max(0, Math.min(1, progress)); 
+                progressArc.setLength(360 * progress);
+            }
+            
             if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
                 if (!pauseBtn.isDisabled()) {
                     pauseBtn.setDisable(true);
@@ -344,7 +408,7 @@ public class FocusView extends VBox {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         
-        // pause logic
+     // pause logic
         pauseBtn.setOnAction(e -> {
             if (session.getStatus() == SessionStatus.RUNNING) {
                 TextInputDialog dialog = new TextInputDialog();
@@ -377,18 +441,16 @@ public class FocusView extends VBox {
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 timeline.stop();
-                
                 if (session.getStatus() != SessionStatus.COMPLETED) {
                     session.abandonSession();
                     sessionHistory.add(session);
                     saveHistory();
                 }
-                
                 showSetupForm();
             }
         });
 
-        this.getChildren().addAll(phaseLabel, timerLabel, goalLabel, controls);
+        this.getChildren().addAll(phaseLabel, timerStack, goalLabel, controls);
     }
 
     private void saveHistory() {

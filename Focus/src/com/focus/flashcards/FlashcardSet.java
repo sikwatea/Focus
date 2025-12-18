@@ -1,5 +1,6 @@
 package com.focus.flashcards;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,14 +12,11 @@ interface FlashcardRepository {
     int size();
 }
 
-public class FlashcardSet implements FlashcardRepository {
+public class FlashcardSet implements FlashcardRepository, Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String name;
     private List<Flashcard> cards;
-
-    public FlashcardSet() {
-        this.name = "";
-        this.cards = new ArrayList<>();
-    }
 
     public FlashcardSet(String name) {
         this.name = name;
@@ -44,6 +42,11 @@ public class FlashcardSet implements FlashcardRepository {
         }
         return false;
     }
+    
+    // helper for removal
+    public void removeFlashcard(Flashcard card) {
+        cards.remove(card);
+    }
 
     @Override
     public boolean editFlashcard(int index, String question, String answer) {
@@ -59,5 +62,10 @@ public class FlashcardSet implements FlashcardRepository {
     @Override
     public int size() {
         return cards.size();
+    }
+    
+    @Override
+    public String toString() {
+        return name + " (" + cards.size() + " cards)";
     }
 }

@@ -17,7 +17,7 @@ import javafx.util.Duration;
 public class Main extends Application {
     private BorderPane mainLayout;
     private FocusView focusView;
-    // private FlashcardView flashcardView;
+    private FlashcardView flashcardView;
     private TaskView taskView;
     @Override
     public void start(Stage primaryStage) {
@@ -63,7 +63,12 @@ public class Main extends Application {
             mainLayout.setCenter(taskView); 
         });
         
-        btnFlashcards.setOnAction(e -> System.out.println("Navigate to Flashcards"));
+        btnFlashcards.setOnAction(e -> {
+        	if (flashcardView == null) {
+        		flashcardView = new FlashcardView();
+            }
+            mainLayout.setCenter(flashcardView);
+        });
         
         btnFocus.setOnAction(e -> {
             if (focusView == null) {
