@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FocusSession {
-    public enum SessionStatus { RUNNING, PAUSED, COMPLETED }
-    public enum SessionPhase { STUDY, BREAKDOWN, BREAK }
-
+	public enum SessionStatus { RUNNING, PAUSED, COMPLETED }
+	public enum SessionPhase { STUDY, BREAKDOWN, BREAK }
+    
     private String label;
     private StudyMethod method;
     private int totalDurationMinutes;
@@ -94,4 +94,5 @@ public class FocusSession {
     public void setRemainingTimeSeconds(long seconds) { this.remainingTimeSeconds = seconds; }
     public int getCurrentIntervalIndex() { return currentIntervalIndex; }
     public void incrementIntervalIndex() { this.currentIntervalIndex++; }
+    public SessionStatus getStatus() { return status; }
 }
