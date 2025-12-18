@@ -115,19 +115,18 @@ public class FocusView extends VBox {
     private void switchToTimerView(FocusSession session) {
         this.getChildren().clear(); 
         
-        // 1. Phase Label (e.g., "STUDY PHASE")
+        // Phase label
         Label phaseLabel = new Label(session.getCurrentPhase().toString());
         phaseLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: #8BA889; -fx-font-weight: bold;");
 
-        // 2. The Big Timer (e.g., "25:00")
+        // Timer label
         Label timerLabel = new Label(formatTime(session.getRemainingTimeSeconds()));
         timerLabel.setStyle("-fx-font-size: 96px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
 
-        // 3. Goal Label
-        Label goalLabel = new Label("Goal: " + labelField.getText()); // Use the text from the field
+        // Goal label
+        Label goalLabel = new Label("Goal: " + labelField.getText()); 
         goalLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #555;");
 
-        // 4. Control Buttons
         Button pauseBtn = new Button("Pause");
         styleControlButton(pauseBtn);
         
@@ -138,7 +137,7 @@ public class FocusView extends VBox {
         HBox controls = new HBox(20, pauseBtn, stopBtn);
         controls.setAlignment(Pos.CENTER);
 
-        // --- TIMER LOGIC 
+        // TIMER LOGIC 
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             // update backend
         	boolean isRunning = session.tick();
@@ -194,10 +193,6 @@ public class FocusView extends VBox {
     }
     
     private java.util.List<StudyMethod> getAllMethods() {
-        // We need to access the methods list. 
-        // Since StudyMethodManager.methods is private in your code, 
-        // we might need to add a getter there, or just recreate them here for the GUI.
-        // For now, let's just create a temporary list manually to match your Manager:
         return java.util.Arrays.asList(
             new com.focus.studyhelper.PomodoroMethod("Pomodoro", "", null),
             new com.focus.studyhelper.FeynmanMethod("Feynman", "", null),
