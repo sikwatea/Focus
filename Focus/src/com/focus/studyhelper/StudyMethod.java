@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.List;
 
 public abstract class StudyMethod implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	protected String name;
     protected String description;
     protected List<String> steps;
@@ -20,10 +22,6 @@ public abstract class StudyMethod implements Serializable {
 
     public abstract void initializeTimeline(FocusSession session);
     public abstract void handlePhaseChange(FocusSession session);
-    
-    public boolean isConsoleRunnable() {
-        return true; 
-    }
 
     @Override
     public String toString() {

@@ -12,46 +12,30 @@ public class TaskList {
         loadTasks();
     }
 
-    public void addTask(String title, LocalDate date) {
-        tasks.add(new StudyTask(title, date)); 
-        saveTasks();
-        System.out.println("Task added.");
-    }
-
-    public void showTasks() {
-        if (tasks.isEmpty()) {
-            System.out.println("No tasks available.");
-            return;
+    // added String type so that we can edit type
+    public void addTask(String title, LocalDate date, String type) {
+        if (type.equals("Study")) {
+            tasks.add(new StudyTask(title, date));
+        } else {
+            tasks.add(new Task(title, date));
         }
-
-        System.out.printf("\n#  %-20s | %-12s | %-8s | Done\n", "Title", "Due Date", "Type");
-        System.out.println("--------------------------------------------------------");
-
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.printf("%-2d %s\n", i + 1, tasks.get(i));
-        }
-    }
-
-    public void completeTask(int index) {
-        if (!isValidIndex(index)) return;
-        tasks.get(index).markCompleted();
         saveTasks();
-        System.out.println("Task completed.");
     }
 
-    public void deleteTask(int index) {
-        if (!isValidIndex(index)) return;
-        tasks.remove(index);
+    // instead of printing tasks diretso kay gi return ra ang list
+    public ArrayList<Task> getTasks() {
+        return tasks;
+    }
+
+    public void updateTask() {
         saveTasks();
-        System.out.println("Task deleted.");
     }
 
-    private boolean isValidIndex(int index) {
-        if (index < 0 || index >= tasks.size()) {
-            System.out.println("Invalid task number.");
-            return false;
+    public void deleteTask(Task task) {
+        if (task != null) {
+            tasks.remove(task);
+            saveTasks();
         }
-        return true;
     }
 
     private void saveTasks() {
@@ -59,16 +43,23 @@ public class TaskList {
                      new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
             out.writeObject(tasks);
         } catch (IOException e) {
-            System.out.println("Error saving tasks.");
+            System.out.println("Error saving tasks: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
     private void loadTasks() {
+        File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            tasks = new ArrayList<>();
+            return;
+        }
+
         try (ObjectInputStream in =
-                     new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+                     new ObjectInputStream(new FileInputStream(file))) {
             tasks = (ArrayList<Task>) in.readObject();
         } catch (Exception e) {
+            System.out.println("Error loading tasks: " + e.getMessage());
             tasks = new ArrayList<>();
         }
     }

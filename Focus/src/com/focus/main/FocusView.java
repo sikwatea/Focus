@@ -1,9 +1,8 @@
 package com.focus.main;
 
-// general imports
+//general imports
 import com.focus.studyhelper.FocusSession;
 import com.focus.studyhelper.StudyMethod;
-import com.focus.studyhelper.StudyMethodManager;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +13,15 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Circle;
+import javafx.scene.layout.Pane;
 
-// timer import
+//timer import
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -24,8 +29,7 @@ import com.focus.studyhelper.FocusSession.SessionStatus;
 
 public class FocusView extends VBox {
     
-    private StudyMethodManager methodManager;
-    private List<FocusSession> sessionHistory = new ArrayList<>();
+	private List<FocusSession> sessionHistory = new ArrayList<>();
     private final String HISTORY_FILE = "focus_history.dat";
     
     private TextField labelField;
@@ -38,8 +42,12 @@ public class FocusView extends VBox {
     
     private Timeline timeline;
     
+    // visual timer
+    private Arc progressArc; 
+    private long currentMaxDuration; 
+    private String lastPhaseName = "";
+    
     public FocusView() {
-        this.methodManager = new StudyMethodManager();
         loadHistory();
         
         this.setPadding(new Insets(30));
@@ -51,98 +59,103 @@ public class FocusView extends VBox {
     }
 
     private void showSetupForm() {
-        this.getChildren().clear();
-        
-        Label header = new Label("Start a Focus Session");
-        header.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #49654E; -fx-font-family: 'Montserrat';");
-
-        VBox labelBox = createInputBox("Session Goal (Label):");
-        labelField = new TextField();
-        labelField.setPromptText("e.g., Math Review");
-        labelBox.getChildren().add(labelField);
-
-        VBox methodBox = createInputBox("Study Method:");
-        HBox methodRow = new HBox(10);
-        
-        methodDropdown = new ComboBox<>();
-        methodDropdown.getItems().addAll(getAllMethods()); 
-        methodDropdown.setPromptText("Select a technique...");
-        methodDropdown.setStyle("-fx-background-color: #e8f5e9; -fx-text-fill: #49654E; -fx-font-size: 16px; -fx-background-radius: 8px;");
-        methodDropdown.setPrefWidth(260);
-        
-        Button infoBtn = new Button("?");
-        infoBtn.setStyle("-fx-background-color: #8BA889; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20px;");
-        infoBtn.setTooltip(new Tooltip("View Method Details"));
-        infoBtn.setOnAction(e -> showMethodInfo());
-        
-        methodRow.getChildren().addAll(methodDropdown, infoBtn);
-        methodBox.getChildren().add(methodRow);
-
-        HBox timeRow = new HBox(20);
-        timeRow.setAlignment(Pos.CENTER);
-        
-        // set time
-        VBox durationBox = createInputBox("Total Time (mins):");
-        durationSpinner = new Spinner<>(1, 1440, 60); // Min 1, Max 1440, Default 60 | FOR DEBUG (actual time should be 5, 1440, 60)
-        durationSpinner.setEditable(true);
-        durationBox.getChildren().add(durationSpinner);
-
-        // set breaks
-        VBox breakCountBox = createInputBox("Breaks:");
-        breaksSpinner = new Spinner<>(0, 24, 1); // Min 0, Max 48, Default 1 | FOR DEBUG (actual time should be 0, 48, 1)
-        breaksSpinner.setEditable(true);
-        breakCountBox.getChildren().add(breaksSpinner);
-
-        timeRow.getChildren().addAll(durationBox, breakCountBox);
-
-        HBox bottomRow = new HBox(20);
-        bottomRow.setAlignment(Pos.CENTER);
-        
-        // break duration
-        VBox breakDurBox = createInputBox("Break Length (mins):");
-        breakDurationSpinner = new Spinner<>(0, 30, 5); // Min 1, Max 30, Default 5 | FOR DEBUG (actual time should be 0, 60, 1)
-        breakDurationSpinner.setEditable(true);
-        breakDurBox.getChildren().add(breakDurationSpinner);
-        
-        breakdownBox = createInputBox("Breakdown Length (mins):");
-        breakdownSpinner = new Spinner<>(1, 60, 5); // Min 1, Max 60, Default 5 | FOR DEBUG (actual time should be 1, 60, 5)
-        breakdownSpinner.setEditable(true);
-        breakdownBox.getChildren().add(breakdownSpinner);
-        
-        breakdownBox.setVisible(false);
-        breakdownBox.setManaged(false);
-        
-        bottomRow.getChildren().addAll(breakDurBox, breakdownBox);
-
-        // listener for feynman
-        methodDropdown.setOnAction(e -> {
-            boolean isFeynman = methodDropdown.getValue() != null && 
-                                methodDropdown.getValue().getName().contains("Feynman");
-            breakdownBox.setVisible(isFeynman);
-            breakdownBox.setManaged(isFeynman);
-        });
-        
-        HBox actionRow = new HBox(20);
-        actionRow.setAlignment(Pos.CENTER);
-        
-        Button startBtn = new Button("Start Focus Session");
-        startBtn.setStyle("-fx-background-color: #49654E; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;");
-        startBtn.setPrefWidth(200);
-        startBtn.setPrefHeight(45);
-        startBtn.setOnAction(e -> handleStartSession());
-
-        Button historyBtn = new Button("History");
-        historyBtn.setStyle("-fx-background-color: #ecf0f1; -fx-text-fill: #49654E; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8px;");
-        historyBtn.setPrefWidth(100);
-        historyBtn.setPrefHeight(45);
-        historyBtn.setOnAction(e -> showHistoryView());
-        
-        actionRow.getChildren().addAll(startBtn, historyBtn);
-        
-        this.getChildren().addAll(header, labelBox, methodBox, timeRow, bottomRow, actionRow);
+    	try {
+	        this.getChildren().clear();
+	        
+	        Label header = new Label("Start a Focus Session");
+	        header.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #49654E; -fx-font-family: 'Montserrat';");
+	
+	        VBox labelBox = createInputBox("Session Goal (Label):");
+	        labelField = new TextField();
+	        labelField.setPromptText("e.g., Math Review");
+	        labelBox.getChildren().add(labelField);
+	
+	        VBox methodBox = createInputBox("Study Method:");
+	        HBox methodRow = new HBox(10);
+	        
+	        methodDropdown = new ComboBox<>();
+	        methodDropdown.getItems().addAll(getAllMethods()); 
+	        methodDropdown.setPromptText("Select a technique...");
+	        methodDropdown.setStyle("-fx-background-color: #e8f5e9; -fx-text-fill: #49654E; -fx-font-size: 16px; -fx-background-radius: 8px;");
+	        methodDropdown.setPrefWidth(260);
+	        
+	        Button infoBtn = new Button("?");
+	        infoBtn.setStyle("-fx-background-color: #8BA889; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20px;");
+	        infoBtn.setTooltip(new Tooltip("View Method Details"));
+	        infoBtn.setOnAction(e -> showMethodInfo());
+	        
+	        methodRow.getChildren().addAll(methodDropdown, infoBtn);
+	        methodBox.getChildren().add(methodRow);
+	
+	        HBox timeRow = new HBox(20);
+	        timeRow.setAlignment(Pos.CENTER);
+	        
+	        // set time
+	        VBox durationBox = createInputBox("Total Time (mins):");
+	        durationSpinner = new Spinner<>(5, 1440, 60); // Min 1, Max 1440, Default 60 | FOR DEBUG (actual time should be 5, 1440, 60)
+	        durationSpinner.setEditable(true);
+	        durationBox.getChildren().add(durationSpinner);
+	
+	        // set breaks
+	        VBox breakCountBox = createInputBox("Breaks:");
+	        breaksSpinner = new Spinner<>(0, 48, 1); // Min 0, Max 48, Default 1 | FOR DEBUG (actual time should be 0, 48, 1)
+	        breaksSpinner.setEditable(true);
+	        breakCountBox.getChildren().add(breaksSpinner);
+	
+	        timeRow.getChildren().addAll(durationBox, breakCountBox);
+	
+	        HBox bottomRow = new HBox(20);
+	        bottomRow.setAlignment(Pos.CENTER);
+	        
+	        // break duration
+	        VBox breakDurBox = createInputBox("Break Length (mins):");
+	        breakDurationSpinner = new Spinner<>(0, 60, 1); // Min 1, Max 30, Default 5 | FOR DEBUG (actual time should be 0, 60, 1)
+	        breakDurationSpinner.setEditable(true);
+	        breakDurBox.getChildren().add(breakDurationSpinner);
+	        
+	        breakdownBox = createInputBox("Breakdown Length (mins):");
+	        breakdownSpinner = new Spinner<>(1, 60, 5); // Min 1, Max 60, Default 5 | FOR DEBUG (actual time should be 1, 60, 5)
+	        breakdownSpinner.setEditable(true);
+	        breakdownBox.getChildren().add(breakdownSpinner);
+	        
+	        breakdownBox.setVisible(false);
+	        breakdownBox.setManaged(false);
+	        
+	        bottomRow.getChildren().addAll(breakDurBox, breakdownBox);
+	
+	        // listener for feynman
+	        methodDropdown.setOnAction(e -> {
+	            boolean isFeynman = methodDropdown.getValue() != null && 
+	                                methodDropdown.getValue().getName().contains("Feynman");
+	            breakdownBox.setVisible(isFeynman);
+	            breakdownBox.setManaged(isFeynman);
+	        });
+	        
+	        HBox actionRow = new HBox(20);
+	        actionRow.setAlignment(Pos.CENTER);
+	        
+	        Button startBtn = new Button("Start Focus Session");
+	        startBtn.setStyle("-fx-background-color: #49654E; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;");
+	        startBtn.setPrefWidth(200);
+	        startBtn.setPrefHeight(45);
+	        startBtn.setOnAction(e -> handleStartSession());
+	
+	        Button historyBtn = new Button("History");
+	        historyBtn.setStyle("-fx-background-color: #ecf0f1; -fx-text-fill: #49654E; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8px;");
+	        historyBtn.setPrefWidth(100);
+	        historyBtn.setPrefHeight(45);
+	        historyBtn.setOnAction(e -> showHistoryView());
+	        
+	        actionRow.getChildren().addAll(startBtn, historyBtn);
+	        
+	        this.getChildren().addAll(header, labelBox, methodBox, timeRow, bottomRow, actionRow);
+    	} catch (Exception e) {
+            e.printStackTrace(); 
+            showAlert("Error building UI: " + e.getMessage());
+    	}
     }
 
-    private void showHistoryView() {
+	private void showHistoryView() {
         this.getChildren().clear();
         
         Label header = new Label("Session History");
@@ -150,33 +163,81 @@ public class FocusView extends VBox {
         
         TableView<FocusSession> table = new TableView<>();
         
-        // Define Columns
         TableColumn<FocusSession, String> colDate = new TableColumn<>("Date");
         colDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
         colDate.setPrefWidth(120);
+        colDate.setStyle("-fx-alignment: CENTER;"); 
         
         TableColumn<FocusSession, String> colLabel = new TableColumn<>("Label");
         colLabel.setCellValueFactory(new PropertyValueFactory<>("label")); 
         colLabel.setPrefWidth(150);
+        colLabel.setStyle("-fx-padding: 0 0 0 10;"); 
         
         TableColumn<FocusSession, String> colMethod = new TableColumn<>("Method");
         colMethod.setCellValueFactory(new PropertyValueFactory<>("methodName")); 
-        colMethod.setPrefWidth(120);
+        colMethod.setPrefWidth(100);
+        colMethod.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<FocusSession, Integer> colTime = new TableColumn<>("Duration");
         colTime.setCellValueFactory(new PropertyValueFactory<>("totalDurationMinutes"));
-        colTime.setPrefWidth(80);
+        colTime.setPrefWidth(90);
+        colTime.setStyle("-fx-alignment: CENTER;");
+        colTime.setCellFactory(column -> new TableCell<FocusSession, Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item + " mins"); 
+                }
+            }
+        });
         
         TableColumn<FocusSession, Integer> colDistractions = new TableColumn<>("Distractions");
         colDistractions.setCellValueFactory(new PropertyValueFactory<>("distractionCount")); 
         colDistractions.setPrefWidth(100);
+        colDistractions.setStyle("-fx-alignment: CENTER;");
 
-        TableColumn<FocusSession, String> colStatus = new TableColumn<>("Status");
+        TableColumn<FocusSession, Object> colStatus = new TableColumn<>("Status");
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colStatus.setPrefWidth(100);
+        colStatus.setPrefWidth(120);
+        colStatus.setStyle("-fx-alignment: CENTER; -fx-font-weight: bold;");
+        colStatus.setCellFactory(column -> new TableCell<FocusSession, Object>() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item.toString());
+                    
+                    if (item.toString().equals("COMPLETED")) {
+                        setTextFill(javafx.scene.paint.Color.web("#49654E")); 
+                    } else if (item.toString().contains("UNFINISHED") || item.toString().contains("ABANDONED")) {
+                        setTextFill(javafx.scene.paint.Color.web("#e74c3c")); 
+                    } else {
+                        setTextFill(javafx.scene.paint.Color.BLACK);
+                    }
+                }
+            }
+        });
 
         table.getColumns().addAll(colDate, colLabel, colMethod, colTime, colDistractions, colStatus);
-        
+
+        table.setFixedCellSize(35);
+        table.setPrefHeight(400);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); 
+
+        table.setStyle(
+            "-fx-base: white; " +
+            "-fx-control-inner-background: white; " +
+            "-fx-table-cell-border-color: transparent; " +
+            "-fx-table-header-border-color: transparent; " +
+            "-fx-padding: 5;"
+        );
+
         // Add Data
         table.getItems().addAll(sessionHistory);
         table.setPlaceholder(new Label("No sessions completed yet."));
@@ -188,7 +249,7 @@ public class FocusView extends VBox {
         this.getChildren().addAll(header, table, backBtn);
     }
 
-    private void showMethodInfo() {
+	private void showMethodInfo() {
         StudyMethod method = methodDropdown.getValue();
         if (method == null) {
             showAlert("Please select a method first.");
@@ -236,14 +297,47 @@ public class FocusView extends VBox {
     private void switchToTimerView(FocusSession session) {
         this.getChildren().clear(); 
         
+        this.currentMaxDuration = session.getRemainingTimeSeconds();
+        this.lastPhaseName = session.getCurrentPhase().toString();
+        
+        StackPane timerStack = new StackPane();
+        timerStack.setPrefSize(300, 300);
+        
+        Circle trackCircle = new Circle(140);
+        trackCircle.setFill(Color.TRANSPARENT);
+        trackCircle.setStroke(Color.web("#ecf0f1"));
+        trackCircle.setStrokeWidth(15);
+        
+        // progress circle
+        progressArc = new Arc();
+        progressArc.setRadiusX(140);
+        progressArc.setRadiusY(140);
+        progressArc.setStartAngle(90); 
+        progressArc.setLength(360);    
+        progressArc.setType(ArcType.OPEN);
+        progressArc.setFill(null);
+        progressArc.setStroke(Color.web("#49654E"));
+        progressArc.setStrokeWidth(15);
+        progressArc.setStrokeLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
+        progressArc.setCenterX(150); 
+        progressArc.setCenterY(150);
+        
+        Pane arcPane = new Pane();
+        arcPane.setPrefSize(300, 300);
+        arcPane.setMaxSize(300, 300);
+        
+        arcPane.getChildren().add(progressArc);
+        
         // Phase label
         Label phaseLabel = new Label(session.getCurrentPhase().toString());
         phaseLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: #8BA889; -fx-font-weight: bold;");
 
         // Timer label
         Label timerLabel = new Label(formatTime(session.getRemainingTimeSeconds()));
-        timerLabel.setStyle("-fx-font-size: 96px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
+        timerLabel.setStyle("-fx-font-size: 78px; -fx-text-fill: #49654E; -fx-font-weight: bold; -fx-font-family: 'Montserrat';");
 
+        timerStack.getChildren().addAll(trackCircle, arcPane, timerLabel);
+        
         // Goal label
         Label goalLabel = new Label("Goal: " + labelField.getText()); 
         goalLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #555;");
@@ -262,10 +356,30 @@ public class FocusView extends VBox {
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             boolean isRunning = session.tick();
 
+            String currentPhaseName = session.getCurrentPhase() != null ? session.getCurrentPhase().toString() : "DONE";
+            if (!currentPhaseName.equals(lastPhaseName)) {
+                // phase change
+                currentMaxDuration = session.getRemainingTimeSeconds();
+                lastPhaseName = currentPhaseName;
+                
+                // change break circle colors
+                if (currentPhaseName.equals("BREAK")) {
+                    progressArc.setStroke(Color.web("#8BA889")); 
+                } else {
+                    progressArc.setStroke(Color.web("#49654E"));
+                }
+            }
+            
             // update labels
             timerLabel.setText(formatTime(session.getRemainingTimeSeconds()));
-            phaseLabel.setText(session.getCurrentPhase() != null ? session.getCurrentPhase().toString() : "COMPLETED");
+            phaseLabel.setText(currentPhaseName);
 
+            if (currentMaxDuration > 0) {
+                double progress = (double) session.getRemainingTimeSeconds() / currentMaxDuration;
+                progress = Math.max(0, Math.min(1, progress)); 
+                progressArc.setLength(360 * progress);
+            }
+            
             if (session.getCurrentPhase() == FocusSession.SessionPhase.BREAK) {
                 if (!pauseBtn.isDisabled()) {
                     pauseBtn.setDisable(true);
@@ -294,7 +408,7 @@ public class FocusView extends VBox {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
         
-        // pause logic
+     // pause logic
         pauseBtn.setOnAction(e -> {
             if (session.getStatus() == SessionStatus.RUNNING) {
                 TextInputDialog dialog = new TextInputDialog();
@@ -319,7 +433,7 @@ public class FocusView extends VBox {
         });
 
         stopBtn.setOnAction(e -> {
-        	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("End Session");
             alert.setHeaderText("Stop this session early?");
             alert.setContentText("This will mark the session as UNFINISHED.");
@@ -327,20 +441,16 @@ public class FocusView extends VBox {
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 timeline.stop();
-                
                 if (session.getStatus() != SessionStatus.COMPLETED) {
                     session.abandonSession();
                     sessionHistory.add(session);
                     saveHistory();
                 }
-                
                 showSetupForm();
             }
-            
-            showSetupForm();
         });
 
-        this.getChildren().addAll(phaseLabel, timerLabel, goalLabel, controls);
+        this.getChildren().addAll(phaseLabel, timerStack, goalLabel, controls);
     }
 
     private void saveHistory() {
@@ -360,6 +470,10 @@ public class FocusView extends VBox {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             sessionHistory = (List<FocusSession>) in.readObject();
             System.out.println("History loaded: " + sessionHistory.size() + " sessions.");
+        } catch (InvalidClassException | ClassNotFoundException e) {
+            System.out.println("Corrupted/Old history file detected. Deleting...");
+            
+            sessionHistory = new ArrayList<>(); 
         } catch (Exception e) {
             System.out.println("Error loading history: " + e.getMessage());
             sessionHistory = new ArrayList<>(); 

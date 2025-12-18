@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FocusSession implements Serializable {
+	private static final long serialVersionUID = 1L;
+			
 	public enum SessionStatus { RUNNING, PAUSED, COMPLETED, UNFINISHED}
 	public enum SessionPhase { STUDY, BREAKDOWN, BREAK }
     
@@ -43,7 +45,9 @@ public class FocusSession implements Serializable {
     }
 
     public boolean tick() {
-        if (status != SessionStatus.RUNNING) return true;
+    	if (status != SessionStatus.RUNNING) {
+            return status != SessionStatus.COMPLETED && status != SessionStatus.UNFINISHED;
+        }
 
         remainingTimeSeconds--;
 
@@ -51,7 +55,7 @@ public class FocusSession implements Serializable {
             method.handlePhaseChange(this);
         }
         
-        return status != SessionStatus.COMPLETED;
+        return status != SessionStatus.COMPLETED && status != SessionStatus.UNFINISHED;
     }
 
     public void logDistraction(String reason) {
@@ -78,11 +82,13 @@ public class FocusSession implements Serializable {
     public void completeSession() {
         status = SessionStatus.COMPLETED;
         currentPhase = null; 
+        System.out.println("Session COMPLETED.");
     }
 
     public void abandonSession() {
         status = SessionStatus.UNFINISHED;
         currentPhase = null;
+        System.out.println("Session ABANDONED.");
     }
     
     public String getStartDate() {
@@ -94,7 +100,12 @@ public class FocusSession implements Serializable {
     public String getStatusDisplay() {
         long mins = remainingTimeSeconds / 60;
         long secs = remainingTimeSeconds % 60;
-        return String.format("[%s] %s - %02d:%02d", status, currentPhase != null ? currentPhase : "DONE", mins, secs);
+        
+        String phaseText = (currentPhase != null) ? currentPhase.toString() : "DONE";
+        
+        if (status == SessionStatus.UNFINISHED) phaseText = "ABANDONED";
+        
+        return String.format("[%s] %s - %02d:%02d", status, phaseText, mins, secs);
     }
 
     @Override
@@ -119,4 +130,18 @@ public class FocusSession implements Serializable {
     public String getLabel() { return label; }
     public String getMethodName() { return method.getName(); }
     public int getDistractionCount() { return distractions.size(); }
+    
+    public static class Distraction implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String reason;
+        private LocalDateTime timestamp;
+
+        public Distraction(String reason) {
+            this.reason = reason;
+            this.timestamp = LocalDateTime.now();
+        }
+
+        public String getReason() { return reason; }
+        public String getTime() { return timestamp.format(DateTimeFormatter.ofPattern("HH:mm")); }
+    }
 }
