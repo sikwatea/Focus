@@ -26,7 +26,6 @@ public class FlashcardService { // old flashcard manager, changed to this to han
         return sets;
     }
 
-    // mao nani ang i call if naa i add or remove nga card sa set to update
     public void saveChanges() {
         saveSets();
     }
@@ -39,7 +38,6 @@ public class FlashcardService { // old flashcard manager, changed to this to han
         }
     }
 
-    // loading logic ra para ma open ang saved nga sets
     @SuppressWarnings("unchecked")
     private void loadSets() {
         File file = new File(FILE_NAME);

@@ -3,7 +3,7 @@ package com.focus.flashcards;
 import java.io.Serializable;
 
 public class Flashcard implements Serializable {
-    private static final long serialVersionUID = 1L; // ayaw i mind pang track rani sa version so it persists
+    private static final long serialVersionUID = 1L;
     
     private String question;
     private String answer;

@@ -92,7 +92,7 @@ public class FocusView extends VBox {
 	        
 	        // set time
 	        VBox durationBox = createInputBox("Total Time (mins):");
-	        durationSpinner = new Spinner<>(5, 1440, 60); // Min 1, Max 1440, Default 60 | FOR DEBUG (actual time should be 5, 1440, 60)
+	        durationSpinner = new Spinner<>(0, 1440, 60); // Min 1, Max 1440, Default 60 | FOR DEBUG (actual time should be 5, 1440, 60)
 	        durationSpinner.setEditable(true);
 	        durationBox.getChildren().add(durationSpinner);
 	

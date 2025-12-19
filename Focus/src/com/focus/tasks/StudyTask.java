@@ -2,7 +2,6 @@ package com.focus.tasks;
 
 import java.time.LocalDate;
 
-// separated from task kay it's not public
 public class StudyTask extends Task {
     private static final long serialVersionUID = 1L;
 
