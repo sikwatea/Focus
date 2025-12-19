@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.io.Serializable;
 
 public class Task implements Serializable {
-    private static final long serialVersionUID = 1L; // ayaw ra i mind as mao rana gamiton pang track sa versions
+    private static final long serialVersionUID = 1L; 
     
     protected String title;
     protected boolean completed;
